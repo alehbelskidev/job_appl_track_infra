@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: job-tracker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      initContainers:
+        - name: migrate
+          image: job-tracker-api:latest
+          imagePullPolicy: Never
+          command: ["./migrate"]
+          envFrom:
+            - secretRef:
+                name: api-secret
+      containers:
+        - name: api
+          image: job-tracker-api:latest
+          imagePullPolicy: Never
+          envFrom:
+            - secretRef:
+                name: api-secret
+          ports:
+            - containerPort: 3001
